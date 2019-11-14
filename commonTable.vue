@@ -83,7 +83,6 @@
 </template>
 
 <script>
-  import { FormatDate } from '@core/filters'
 export default {
   name: 'RulesCommonTable',
   props: {
