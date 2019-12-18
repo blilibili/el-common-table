@@ -4,6 +4,7 @@
     <!--表格-->
     <el-table :data="tData"
               row-key="skuNo"
+              style="width: 100%;"
               class="commonTable"
               border
               :max-height="tHeight"
@@ -23,7 +24,7 @@
               label="序号"
       ></el-table-column>
       <el-table-column
-              align="center"
+              align="left"
               :show-overflow-tooltip="true"
               v-for="(item , index) in getCol"
               :key="item.prop"
@@ -66,13 +67,20 @@
               </el-option>
             </el-select>
           </div>
+          <!--自定义 slotName 插槽名称-->
+          <div v-else-if="item.prop === 'slot'">
+            <div>
+              <slot :name="item.slotName"
+                    :row="scope.row" :arrIndex="scope.$index"></slot>
+            </div>
+          </div>
           <div v-else>
             {{scope.row[item.prop]}}
           </div>
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" v-if="$props.isHasOpera">
+      <el-table-column :width="parseInt($props.operatingWidth)" label="操作" v-if="$props.isHasOpera">
         <template slot-scope="scope">
           <slot name="operate"
                 :row="scope.row" :arrIndex="scope.$index"></slot>
@@ -83,9 +91,15 @@
 </template>
 
 <script>
+  import { FormatDate } from '@core/filters'
 export default {
   name: 'RulesCommonTable',
   props: {
+    // 控制操作的长度默认是空
+    operatingWidth:{
+      type: String || Number,
+      default: ''
+    },
     // 是否显示序列号
     isShowIndex:{
       type: Boolean,
@@ -145,47 +159,16 @@ export default {
       })
       let documentWidth = parseInt(this.$refs.commonTableRef.bodyWidth.split('p')[0])
 
+      console.log(documentWidth , calWidth)
       if(calWidth < documentWidth && document.body.clientWidth > 1366){
-        this.$refs.commonTableRef.$el.style.width = calWidth + 51 + 'px'
+        this.$refs.commonTableRef.$el.style.width = '100%'
       }
     })
   },
   methods:{
-    /**
-     * 时间戳转日期格式
-     * @param date 时间
-     * @param type 时间类型 yyyy-MM-dd HH:mm:ss ww
-     * return string
-     */
-    FormatDate (date, type) {
-      if (!date) return ''
-      date = typeof date === 'number' ? new Date(date) : date
-      type = type || 'yyyy-MM-dd HH:mm:ss'
-      let obj = {
-        'y': date.getFullYear(), // 年份，注意必须用getFullYear
-        'M': date.getMonth() + 1, // 月份，注意是从0-11
-        'd': date.getDate(), // 日期
-        'q': Math.floor((date.getMonth() + 3) / 3), // 季度
-        'w': date.getDay(), // 星期，注意是0-6
-        'H': date.getHours(), // 24小时制
-        'h': date.getHours() % 12 === 0 ? 12 : date.getHours() % 12, // 12小时制
-        'm': date.getMinutes(), // 分钟
-        's': date.getSeconds(), // 秒
-        'S': date.getMilliseconds() // 毫秒
-      }
-      let week = ['天', '一', '二', '三', '四', '五', '六']
-      for (let i in obj) {
-        type = type.replace(new RegExp(i + '+', 'g'), function (m) {
-          let val = obj[i] + ''
-          if (i === 'w') return (m.length > 2 ? '星期' : '周') + week[val]
-          for (let j = 0, len = val.length; j < m.length - len; j++) val = '0' + val
-          return m.length === 1 ? val : val.substring(val.length - m.length)
-        })
-      }
-      return type
-    },
     blurInputValue(filed , index , row , validateType , arr){
       // 小数点取后两位
+
       if(validateType === 'int'){
         this.$props.tData[index][filed] = parseInt(this.$props.tData[index][filed])
       }else if(validateType === 'float'){
@@ -225,7 +208,7 @@ export default {
   },
   filters: {
     transformDate: function(value) {
-      return this.FormatDate(new Date(value))
+      return FormatDate(new Date(value))
     }
   }
 }
