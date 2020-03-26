@@ -4,7 +4,7 @@
     <!--表格-->
     <el-table :data="tData"
               row-key="skuNo"
-              style="width: 100%;"
+              style="width: 100%;position: relative;"
               class="commonTable"
               border
               :max-height="tHeight"
@@ -27,7 +27,7 @@
               align="left"
               :show-overflow-tooltip="true"
               v-for="(item , index) in getCol"
-              :key="item.prop"
+              :key="item.prop + '-' + index + '-' + 'only'"
               :prop="item.prop"
               :label="item.label"
               :width="item.width">
@@ -35,7 +35,10 @@
           <div v-if="item.filter && item.filter === 'date'">
             {{scope.row[item.prop] | transformDate}}
           </div>
-          <div v-if="item.filter && item.filter === 'percent'">
+          <div v-else-if="item.filter && item.filter === 'times'">
+            {{scope.row[item.prop] | transformTimes}}
+          </div>
+          <div v-else-if="item.filter && item.filter === 'percent'">
             {{scope.row[item.prop]}}%
           </div>
           <!--有值存在-->
@@ -69,18 +72,16 @@
           </div>
           <!--自定义 slotName 插槽名称-->
           <div v-else-if="item.prop === 'slot'">
-            <div>
-              <slot :name="item.slotName"
-                    :row="scope.row" :arrIndex="scope.$index"></slot>
-            </div>
+            <slot :name="item.slotName"
+                  :row="scope.row" :arrIndex="scope.$index"></slot>
           </div>
-          <div v-else>
-            {{scope.row[item.prop]}}
+          <div v-html="scope.row[item.prop]" v-else>
+
           </div>
         </template>
       </el-table-column>
 
-      <el-table-column :width="parseInt($props.operatingWidth)" label="操作" v-if="$props.isHasOpera">
+      <el-table-column fixed="right" :width="parseInt($props.operatingWidth)" label="操作" v-if="$props.isHasOpera">
         <template slot-scope="scope">
           <slot name="operate"
                 :row="scope.row" :arrIndex="scope.$index"></slot>
@@ -91,51 +92,52 @@
 </template>
 
 <script>
-  import { FormatDate } from '@core/filters'
+
+import {FormatDate} from '@/utils/filters'
 export default {
   name: 'RulesCommonTable',
   props: {
     // 控制操作的长度默认是空
-    operatingWidth:{
+    operatingWidth: {
       type: String || Number,
       default: ''
     },
     // 是否显示序列号
-    isShowIndex:{
+    isShowIndex: {
       type: Boolean,
       default: true
     },
     // 是否展示操作
-    isHasOpera:{
+    isHasOpera: {
       type: Boolean,
       default: true
     },
     // 是否展示跨页全选
-    isReserveSelect:{
+    isReserveSelect: {
       type: Boolean,
       default: false
     },
     // 当前第几页
-    currentPage:{
+    currentPage: {
       type: Number,
       default: 1
     },
     // 默认发射选中的方法名
-    emitSelectionName:{
+    emitSelectionName: {
       type: String,
       default: 'changeRow'
     },
-    isSelection:{
+    isSelection: {
       type: Boolean,
       default: false
     },
     tColumnData: {
       type: Array,
-      default: []
+      default: () => []
     },
     tData: {
       type: Array,
-      default: []
+      default: () => []
     },
     isSelect: {
       type: Boolean,
@@ -146,60 +148,57 @@ export default {
       default: 520
     }
   },
-  watch:{
-    '$props.tData'(val){
-      // console.log(this.$props.toSelectedRow , this.$props.currentPage)
-    }
-  },
-  mounted(){
+  mounted() {
     this.$nextTick(() => {
       let calWidth = 0
-      this.$props.tColumnData.forEach((v , k) => {
-        calWidth = parseInt(calWidth) + parseInt(v.width)
+      this.$props.tColumnData.forEach((v) => {
+        calWidth = parseInt(calWidth, 10) + parseInt(v.width, 10)
       })
-      let documentWidth = parseInt(this.$refs.commonTableRef.bodyWidth.split('p')[0])
+      const documentWidth = parseInt(this.$refs.commonTableRef.bodyWidth.split('p')[0], 10)
 
-      console.log(documentWidth , calWidth)
-      if(calWidth < documentWidth && document.body.clientWidth > 1366){
+      if (calWidth < documentWidth && document.body.clientWidth > 1366) {
         this.$refs.commonTableRef.$el.style.width = '100%'
       }
     })
   },
-  methods:{
-    blurInputValue(filed , index , row , validateType , arr){
+  methods: {
+    blurInputValue(filed, index, row, validateType, arr) {
       // 小数点取后两位
-
-      if(validateType === 'int'){
-        this.$props.tData[index][filed] = parseInt(this.$props.tData[index][filed])
-      }else if(validateType === 'float'){
+      if (validateType === 'int') {
+        this.$props.tData[index][filed] = parseInt(this.$props.tData[index][filed], 10)
+      } else if (validateType === 'float') {
         this.$props.tData[index][filed] = parseFloat(parseFloat(this.$props.tData[index][filed]).toFixed(2))
-      }else{}
-      this.$props.tData.splice(0,0)
-      this.$emit('inputBlurCallBack' , {filed: filed , index: index , value: row , arr: arr})
-    },
-    refreshView(){
-      this.tData.splice(0,0)
-    },
-    updateStatus(col , row , index , opt){
-      let currentData = row[col]
-      let updateData = ''
-      if(opt.indexOf(currentData) === 0){
-        updateData = opt[1]
-      }else{
-        updateData = opt[0]
       }
-      this.$emit('switchUpdate' , {col: col , data: row , index: index , updateValue: updateData})
+      this.$props.tData.splice(0, 0)
+      this.$emit('inputBlurCallBack', {
+        filed: filed, index: index, value: row, arr: arr
+      })
     },
-    handleSelectionChange(val){
-      this.$emit(this.$props.emitSelectionName , val)
+    refreshView() {
+      this.tData.splice(0, 0)
+    },
+    updateStatus(col, row, index, opt) {
+      const currentData = row[col]
+      let updateData = ''
+      if (opt.indexOf(currentData) === 0) {
+        [updateData] = [opt[1]]
+      } else {
+        [updateData] = [opt[0]]
+      }
+      this.$emit('switchUpdate', {
+        col: col, data: row, index: index, updateValue: updateData
+      })
+    },
+    handleSelectionChange(val) {
+      this.$emit(this.$props.emitSelectionName, val)
     }
   },
-  computed:{
+  computed: {
     // 过滤isShow 不展示的值
-    getCol(){
-      let tmp = []
-      this.$props.tColumnData.forEach((v , k) => {
-        if(v.isShow){
+    getCol() {
+      const tmp = []
+      this.$props.tColumnData.forEach((v) => {
+        if (v.isShow) {
           tmp.push(v)
         }
       })
@@ -207,8 +206,17 @@ export default {
     }
   },
   filters: {
-    transformDate: function(value) {
-      return FormatDate(new Date(value))
+    transformDate(value) {
+      if (value) {
+        return FormatDate(new Date(value))
+      }
+      return ''
+    },
+    transformTimes(value) {
+      if (value) {
+        return FormatDate(new Date(value)).split(' ')[1]
+      }
+      return ''
     }
   }
 }
