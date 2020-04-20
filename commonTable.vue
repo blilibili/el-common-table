@@ -32,12 +32,12 @@
               :label="item.label"
               :width="item.width">
         <template slot-scope="scope">
-          <div v-if="item.filter && item.filter === 'date'">
-            {{scope.row[item.prop] | transformDate}}
-          </div>
-          <div v-else-if="item.filter && item.filter === 'times'">
-            {{scope.row[item.prop] | transformTimes}}
-          </div>
+<!--          <div v-if="item.filter && item.filter === 'date'">-->
+<!--            {{scope.row[item.prop] | transformDate}}-->
+<!--          </div>-->
+<!--          <div v-else-if="item.filter && item.filter === 'times'">-->
+<!--            {{scope.row[item.prop] | transformTimes}}-->
+<!--          </div>-->
           <div v-else-if="item.filter && item.filter === 'percent'">
             {{scope.row[item.prop]}}%
           </div>
@@ -93,7 +93,7 @@
 
 <script>
 
-import {FormatDate} from '@/utils/filters'
+// import {FormatDate} from '@/utils/filters'
 export default {
   name: 'RulesCommonTable',
   props: {
@@ -206,18 +206,18 @@ export default {
     }
   },
   filters: {
-    transformDate(value) {
-      if (value) {
-        return FormatDate(new Date(value))
-      }
-      return ''
-    },
-    transformTimes(value) {
-      if (value) {
-        return FormatDate(new Date(value)).split(' ')[1]
-      }
-      return ''
-    }
+    // transformDate(value) {
+    //   if (value) {
+    //     return FormatDate(new Date(value))
+    //   }
+    //   return ''
+    // },
+    // transformTimes(value) {
+    //   if (value) {
+    //     return FormatDate(new Date(value)).split(' ')[1]
+    //   }
+    //   return ''
+    // }
   }
 }
 </script>
