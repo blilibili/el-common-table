@@ -73,3 +73,6 @@ commonTable (数据控制表格组件)
 
 
 2021/02/10  更新基于饿了么城市选择组件  Address
+基于 element-china-area-data 的城市码
+allText ---- 设置 全选的名称  像’全部‘， ’不限‘
+@changeSelectionAddress  接收选择的数组，目前是匹配文字数组返回
