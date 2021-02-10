@@ -1,5 +1,5 @@
-# server_components
-日常工作组件封装
+# tables
+基于饿了么表格组件封装
 
 commonTable (数据控制表格组件)
 方便于日常工作表格 或者表格增删改查渲染渲染 
@@ -70,3 +70,6 @@ commonTable (数据控制表格组件)
 表格的方法: 
 1. inputBlurCallBack  返回{filed: filed 字段名, index: index 数组下标, value: row 值, arr: arr 整体数组 }
 2. emitSelectionName  返回当前选中的全选数组
+
+
+2021/02/10  更新基于饿了么城市选择组件  Address
