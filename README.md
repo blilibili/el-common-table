@@ -5,7 +5,7 @@ commonTable (数据控制表格组件)
 方便于日常工作表格 或者表格增删改查渲染渲染 
 数据格式：
 
-[
+const selectData = [
      // 一般的展示
    
     {
@@ -46,6 +46,15 @@ commonTable (数据控制表格组件)
       },
 ]
 
+表格代码示例：
+<CommonTable               
+  :is-selection="true"
+  :is-has-opera="false"
+  :is-show-index="false"
+  :t-column-data="selectData"
+  :t-data="[{stockPrice: 'test'}]"
+  @changeRow="changeRowPersonList"
+/>
 
 若是插槽模式：
 <div slot="labelImgSlot" slot-scope="scope">
